@@ -82,7 +82,7 @@ export const todoService = {
     const newTodo = {
       id: crypto.randomUUID(),
       title: todoData.title,
-      status: 'todo',
+      status: todoData.status ?? 'todo',
       dueDate: todoData.dueDate ?? null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()

@@ -1,7 +1,15 @@
 import React from 'react';
 import TodoItem from './TodoItem';
 
-function TodoList({ todos, onToggle, onDelete, onUpdateDueDate, onUpdateTitle, showOverdueOnly }) {
+function TodoList({
+  todos,
+  statuses = [],
+  onStatusChange,
+  onDelete,
+  onUpdateDueDate,
+  onUpdateTitle,
+  showOverdueOnly,
+}) {
   if (todos.length === 0) {
     return (
       <div className="empty-state">
@@ -14,42 +22,31 @@ function TodoList({ todos, onToggle, onDelete, onUpdateDueDate, onUpdateTitle, s
     );
   }
 
-  const pendingTodos = todos.filter(t => t.status === 'todo');
-  const doneTodos = todos.filter(t => t.status === 'done');
-
   return (
     <div className="todo-list">
-      {pendingTodos.length > 0 && (
-        <section className="todo-section">
-          <h2>To Do ({pendingTodos.length})</h2>
-          {pendingTodos.map(todo => (
-            <TodoItem
-              key={todo.id}
-              todo={todo}
-              onToggle={onToggle}
-              onDelete={onDelete}
-              onUpdateDueDate={onUpdateDueDate}
-              onUpdateTitle={onUpdateTitle}
-            />
-          ))}
-        </section>
-      )}
+      {statuses.map((status) => {
+        const sectionTodos = todos.filter((t) => t.status === status.id);
+        if (sectionTodos.length === 0) {
+          return null;
+        }
 
-      {doneTodos.length > 0 && (
-        <section className="todo-section">
-          <h2>Done ({doneTodos.length})</h2>
-          {doneTodos.map(todo => (
-            <TodoItem
-              key={todo.id}
-              todo={todo}
-              onToggle={onToggle}
-              onDelete={onDelete}
-              onUpdateDueDate={onUpdateDueDate}
-              onUpdateTitle={onUpdateTitle}
-            />
-          ))}
-        </section>
-      )}
+        return (
+          <section key={status.id} className="todo-section">
+            <h2>{status.label} ({sectionTodos.length})</h2>
+            {sectionTodos.map((todo) => (
+              <TodoItem
+                key={todo.id}
+                todo={todo}
+                statuses={statuses}
+                onStatusChange={onStatusChange}
+                onDelete={onDelete}
+                onUpdateDueDate={onUpdateDueDate}
+                onUpdateTitle={onUpdateTitle}
+              />
+            ))}
+          </section>
+        );
+      })}
     </div>
   );
 }
