@@ -35,6 +35,7 @@ export const todoService = {
       id: crypto.randomUUID(),
       title: todoData.title,
       status: 'todo',
+      dueDate: todoData.dueDate ?? null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -48,11 +49,17 @@ export const todoService = {
     const index = todos.findIndex(todo => todo.id === id);
     if (index === -1) return null;
 
-    todos[index] = {
+    const next = {
       ...todos[index],
       ...updates,
       updatedAt: new Date().toISOString()
     };
+
+    if ('dueDate' in updates) {
+      next.dueDate = updates.dueDate ?? null;
+    }
+
+    todos[index] = next;
     writeTodos(todos);
     return todos[index];
   },
