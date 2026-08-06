@@ -61,6 +61,7 @@ todo-workshop/
 |--------|----------|-------------|
 | GET | /api/todos | Get all todos |
 | GET | /api/todos/statistics | Get server-calculated todo statistics |
+| GET | /api/todos/statistics/created-trend | Get daily task creation counts |
 | GET | /api/todos/:id | Get single todo |
 | POST | /api/todos | Create todo |
 | PUT | /api/todos/:id | Update todo |
@@ -92,6 +93,21 @@ todo-workshop/
     "review": 0,
     "done": 0
   }
+}
+```
+
+## Creation Trend Response
+
+`GET /api/todos/statistics/created-trend` groups valid creation timestamps by UTC date:
+
+```json
+{
+  "tasksCreatedByDate": [
+    {
+      "date": "2026-08-06",
+      "count": 3
+    }
+  ]
 }
 ```
 

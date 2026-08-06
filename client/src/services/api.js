@@ -23,6 +23,8 @@ export const api = {
 
     getStatistics: () => fetchApi('/todos/statistics'),
 
+    getCreatedTrend: () => fetchApi('/todos/statistics/created-trend'),
+
     getById: (id) => fetchApi(`/todos/${id}`),
 
     create: ({ title, dueDate = null }) => fetchApi('/todos', {
