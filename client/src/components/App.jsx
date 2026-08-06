@@ -138,6 +138,7 @@ function App() {
             ) : (
               <TodoList
                 todos={visibleTodos}
+                onStatusChange={handleStatusChange}
                 statuses={statuses}
                 onStatusChange={handleStatusChange}
                 onDelete={handleDelete}
