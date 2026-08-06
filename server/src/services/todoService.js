@@ -6,6 +6,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const DATA_FILE = join(__dirname, '../data/todos.json');
 
+export const VALID_PRIORITIES = ['low', 'medium', 'high'];
+const DEFAULT_PRIORITY = 'medium';
+
 function readTodos() {
   try {
     const data = readFileSync(DATA_FILE, 'utf-8');
@@ -19,14 +22,30 @@ function writeTodos(todos) {
   writeFileSync(DATA_FILE, JSON.stringify(todos, null, 2));
 }
 
+function normalizePriority(priority) {
+  if (priority === undefined || priority === null || priority === '') {
+    return DEFAULT_PRIORITY;
+  }
+  return priority;
+}
+
+function withNormalizedPriority(todo) {
+  if (!todo) return todo;
+  return {
+    ...todo,
+    priority: normalizePriority(todo.priority),
+  };
+}
+
 export const todoService = {
   getAll() {
-    return readTodos();
+    return readTodos().map(withNormalizedPriority);
   },
 
   getById(id) {
     const todos = readTodos();
-    return todos.find(todo => todo.id === id);
+    const todo = todos.find(todo => todo.id === id);
+    return withNormalizedPriority(todo);
   },
 
   create(todoData) {
@@ -35,6 +54,7 @@ export const todoService = {
       id: crypto.randomUUID(),
       title: todoData.title,
       status: 'todo',
+      priority: normalizePriority(todoData.priority),
       dueDate: todoData.dueDate ?? null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -59,9 +79,13 @@ export const todoService = {
       next.dueDate = updates.dueDate ?? null;
     }
 
+    if ('priority' in updates) {
+      next.priority = normalizePriority(updates.priority);
+    }
+
     todos[index] = next;
     writeTodos(todos);
-    return todos[index];
+    return withNormalizedPriority(todos[index]);
   },
 
   delete(id) {

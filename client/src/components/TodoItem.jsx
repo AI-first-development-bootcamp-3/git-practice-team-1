@@ -13,11 +13,14 @@ function isOverdue(todo) {
   return todo.dueDate < todayStr;
 }
 
-function TodoItem({ todo, onToggle, onDelete, onUpdateDueDate }) {
+function TodoItem({ todo, onToggle, onDelete, onUpdateDueDate, onUpdatePriority }) {
   const overdue = isOverdue(todo);
+  const priority = todo.priority || 'medium';
 
   return (
-    <div className={`todo-item ${todo.status === 'done' ? 'done' : ''} ${overdue ? 'overdue' : ''}`}>
+    <div
+      className={`todo-item priority-${priority} ${todo.status === 'done' ? 'done' : ''} ${overdue ? 'overdue' : ''}`}
+    >
       <button
         className="toggle-btn"
         onClick={() => onToggle(todo.id)}
@@ -28,18 +31,33 @@ function TodoItem({ todo, onToggle, onDelete, onUpdateDueDate }) {
 
       <div className="todo-content">
         <span className="todo-title">{todo.title}</span>
-        <div className="todo-due-date">
-          <label>
-            Due
-            <input
-              type="date"
-              className="due-date-input"
-              value={todo.dueDate || ''}
-              onChange={(e) => onUpdateDueDate(todo.id, e.target.value || null)}
-              aria-label={`Due date for ${todo.title}`}
-            />
+        <div className="todo-meta">
+          <label className="priority-label">
+            Priority
+            <select
+              className={`priority-select priority-${priority}`}
+              value={priority}
+              onChange={(e) => onUpdatePriority(todo.id, e.target.value)}
+              aria-label={`Priority for ${todo.title}`}
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
           </label>
-          {overdue && <span className="overdue-badge">Overdue</span>}
+          <div className="todo-due-date">
+            <label>
+              Due
+              <input
+                type="date"
+                className="due-date-input"
+                value={todo.dueDate || ''}
+                onChange={(e) => onUpdateDueDate(todo.id, e.target.value || null)}
+                aria-label={`Due date for ${todo.title}`}
+              />
+            </label>
+            {overdue && <span className="overdue-badge">Overdue</span>}
+          </div>
         </div>
       </div>
 

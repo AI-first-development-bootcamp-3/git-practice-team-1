@@ -1,4 +1,4 @@
-import { todoService } from '../services/todoService.js';
+import { todoService, VALID_PRIORITIES } from '../services/todoService.js';
 
 const DUE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -25,6 +25,10 @@ function normalizeDueDate(dueDate) {
   return dueDate;
 }
 
+function isValidPriority(priority) {
+  return VALID_PRIORITIES.includes(priority);
+}
+
 export default async function todosRoutes(fastify, options) {
 
   // GET /api/todos - Get all todos
@@ -43,16 +47,22 @@ export default async function todosRoutes(fastify, options) {
 
   // POST /api/todos - Create new todo
   fastify.post('/', async (request, reply) => {
-    const { title, dueDate } = request.body || {};
+    const { title, dueDate, priority } = request.body || {};
     if (!title || !title.trim()) {
       return reply.status(400).send({ error: 'Title is required' });
     }
     if (!isValidDueDate(dueDate)) {
       return reply.status(400).send({ error: 'dueDate must be YYYY-MM-DD' });
     }
+    if (priority !== undefined && priority !== null && priority !== '' && !isValidPriority(priority)) {
+      return reply.status(400).send({ error: 'priority must be low, medium, or high' });
+    }
     const todo = todoService.create({
       title: title.trim(),
       dueDate: normalizeDueDate(dueDate),
+      ...(priority !== undefined && priority !== null && priority !== ''
+        ? { priority }
+        : {}),
     });
     return reply.status(201).send(todo);
   });
@@ -67,6 +77,12 @@ export default async function todosRoutes(fastify, options) {
 
     if ('dueDate' in updates) {
       updates.dueDate = normalizeDueDate(updates.dueDate);
+    }
+
+    if ('priority' in updates) {
+      if (!isValidPriority(updates.priority)) {
+        return reply.status(400).send({ error: 'priority must be low, medium, or high' });
+      }
     }
 
     const todo = todoService.update(request.params.id, updates);

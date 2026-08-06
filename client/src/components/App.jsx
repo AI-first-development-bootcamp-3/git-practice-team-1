@@ -28,9 +28,9 @@ function App() {
     }
   };
 
-  const handleAdd = async ({ title, dueDate }) => {
+  const handleAdd = async ({ title, dueDate, priority }) => {
     try {
-      const newTodo = await api.todos.create({ title, dueDate });
+      const newTodo = await api.todos.create({ title, dueDate, priority });
       setTodos([...todos, newTodo]);
     } catch (err) {
       setError(err.message);
@@ -51,6 +51,15 @@ function App() {
   const handleUpdateDueDate = async (id, dueDate) => {
     try {
       const updated = await api.todos.update(id, { dueDate });
+      setTodos(todos.map(t => t.id === id ? updated : t));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleUpdatePriority = async (id, priority) => {
+    try {
+      const updated = await api.todos.update(id, { priority });
       setTodos(todos.map(t => t.id === id ? updated : t));
     } catch (err) {
       setError(err.message);
@@ -105,6 +114,7 @@ function App() {
             onToggle={handleToggle}
             onDelete={handleDelete}
             onUpdateDueDate={handleUpdateDueDate}
+            onUpdatePriority={handleUpdatePriority}
             showOverdueOnly={showOverdueOnly}
           />
         )}
