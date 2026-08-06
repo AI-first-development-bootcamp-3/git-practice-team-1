@@ -51,6 +51,27 @@ export const todoService = {
     };
   },
 
+  getCreatedTrend() {
+    const todos = readTodos();
+    const countsByDate = {};
+
+    for (const todo of todos) {
+      const createdAt = new Date(todo.createdAt);
+      if (Number.isNaN(createdAt.getTime())) {
+        continue;
+      }
+
+      const date = createdAt.toISOString().slice(0, 10);
+      countsByDate[date] = (countsByDate[date] ?? 0) + 1;
+    }
+
+    const tasksCreatedByDate = Object.entries(countsByDate)
+      .sort(([firstDate], [secondDate]) => firstDate.localeCompare(secondDate))
+      .map(([date, count]) => ({ date, count }));
+
+    return { tasksCreatedByDate };
+  },
+
   getById(id) {
     const todos = readTodos();
     return todos.find(todo => todo.id === id);

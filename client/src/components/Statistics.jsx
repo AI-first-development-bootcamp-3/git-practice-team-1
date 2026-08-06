@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
+import StatusChart from './StatusChart';
+import PieChart from './PieChart';
+import LineChart from './LineChart';
 
 const STATUS_LABELS = {
   todo: 'To Do',
@@ -10,14 +13,19 @@ const STATUS_LABELS = {
 
 function Statistics() {
   const [statistics, setStatistics] = useState(null);
+  const [tasksCreatedByDate, setTasksCreatedByDate] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const loadStatistics = async () => {
     try {
       setLoading(true);
-      const data = await api.todos.getStatistics();
-      setStatistics(data);
+      const [statisticsData, trendData] = await Promise.all([
+        api.todos.getStatistics(),
+        api.todos.getCreatedTrend(),
+      ]);
+      setStatistics(statisticsData);
+      setTasksCreatedByDate(trendData.tasksCreatedByDate);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -92,6 +100,13 @@ function Statistics() {
             </strong>
           </article>
         ))}
+      </div>
+
+      <StatusChart tasksByStatus={statistics.tasksByStatus} />
+
+      <div className="visual-charts-grid">
+        <PieChart tasksByStatus={statistics.tasksByStatus} />
+        <LineChart tasksCreatedByDate={tasksCreatedByDate} />
       </div>
     </section>
   );

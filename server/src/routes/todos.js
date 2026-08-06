@@ -37,6 +37,11 @@ export default async function todosRoutes(fastify, options) {
     return todoService.getStatistics();
   });
 
+  // GET /api/todos/statistics/created-trend - Get daily task creation counts
+  fastify.get('/statistics/created-trend', async (request, reply) => {
+    return todoService.getCreatedTrend();
+  });
+
   // GET /api/todos/:id - Get single todo
   fastify.get('/:id', async (request, reply) => {
     const todo = todoService.getById(request.params.id);
