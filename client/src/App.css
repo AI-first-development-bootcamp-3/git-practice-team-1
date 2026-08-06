@@ -44,11 +44,13 @@ body {
 .add-todo {
   display: flex;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .add-input {
   flex: 1;
+  min-width: 180px;
   padding: 14px 18px;
   font-size: 16px;
   border: 2px solid #e0e0e0;
@@ -58,6 +60,21 @@ body {
 }
 
 .add-input:focus {
+  border-color: #4361ee;
+}
+
+.due-date-input {
+  padding: 12px 14px;
+  font-size: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  outline: none;
+  background: white;
+  color: #333;
+  transition: border-color 0.2s;
+}
+
+.due-date-input:focus {
   border-color: #4361ee;
 }
 
@@ -80,6 +97,30 @@ body {
 .add-btn:disabled {
   background: #a0a0a0;
   cursor: not-allowed;
+}
+
+/* === FILTERS === */
+.filters {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: #4361ee;
+  cursor: pointer;
 }
 
 /* === TODO LIST === */
@@ -110,7 +151,8 @@ body {
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   margin-bottom: 8px;
-  transition: box-shadow 0.2s;
+  border: 1px solid transparent;
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
 
 .todo-item:hover {
@@ -124,6 +166,19 @@ body {
 .todo-item.done .todo-title {
   text-decoration: line-through;
   color: #888;
+}
+
+.todo-item.overdue {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.todo-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 
 .toggle-btn {
@@ -152,8 +207,35 @@ body {
 }
 
 .todo-title {
-  flex: 1;
   font-size: 16px;
+}
+
+.todo-due-date {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.todo-due-date label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.todo-due-date .due-date-input {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.overdue-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #dc2626;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .delete-btn {
