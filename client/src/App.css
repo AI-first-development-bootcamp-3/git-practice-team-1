@@ -240,6 +240,31 @@ body {
 
 .todo-title {
   font-size: 16px;
+  cursor: text;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+}
+
+.todo-title:hover {
+  background: rgba(67, 97, 238, 0.08);
+}
+
+.todo-title:focus {
+  outline: 2px solid #4361ee;
+  outline-offset: 1px;
+}
+
+.todo-title-input {
+  width: 100%;
+  font-size: 16px;
+  padding: 6px 10px;
+  border: 2px solid #4361ee;
+  border-radius: 6px;
+  outline: none;
+  font-family: inherit;
+  color: #333;
+  background: white;
 }
 
 .todo-due-date {
