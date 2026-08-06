@@ -39,11 +39,9 @@ function App() {
     }
   };
 
-  const handleToggle = async (id) => {
+  const handleStatusChange = async (id, status) => {
     try {
-      const todo = todos.find(t => t.id === id);
-      const newStatus = todo.status === 'done' ? 'todo' : 'done';
-      const updated = await api.todos.update(id, { status: newStatus });
+      const updated = await api.todos.update(id, { status });
       setTodos(todos.map(t => t.id === id ? updated : t));
     } catch (err) {
       setError(err.message);
@@ -126,7 +124,7 @@ function App() {
             ) : (
               <TodoList
                 todos={visibleTodos}
-                onToggle={handleToggle}
+                onStatusChange={handleStatusChange}
                 onDelete={handleDelete}
                 onUpdateDueDate={handleUpdateDueDate}
                 showOverdueOnly={showOverdueOnly}

@@ -1,6 +1,7 @@
 import { todoService } from '../services/todoService.js';
 
 const DUE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const VALID_STATUSES = new Set(['todo', 'in-progress', 'review', 'done']);
 
 function isValidDueDate(dueDate) {
   if (dueDate === null || dueDate === undefined || dueDate === '') {
@@ -23,6 +24,10 @@ function normalizeDueDate(dueDate) {
     return null;
   }
   return dueDate;
+}
+
+function isValidStatus(status) {
+  return typeof status === 'string' && VALID_STATUSES.has(status);
 }
 
 export default async function todosRoutes(fastify, options) {
@@ -73,6 +78,10 @@ export default async function todosRoutes(fastify, options) {
 
     if ('dueDate' in updates && !isValidDueDate(updates.dueDate)) {
       return reply.status(400).send({ error: 'dueDate must be YYYY-MM-DD' });
+    }
+
+    if ('status' in updates && !isValidStatus(updates.status)) {
+      return reply.status(400).send({ error: 'status must be one of todo, in-progress, review, done' });
     }
 
     if ('dueDate' in updates) {

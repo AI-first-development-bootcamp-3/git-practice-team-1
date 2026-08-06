@@ -66,7 +66,7 @@ body {
 
 .main {
   flex: 1;
-  max-width: 600px;
+  max-width: 1400px;
   width: 100%;
   margin: 0 auto;
   padding: 24px;
@@ -155,35 +155,75 @@ body {
   cursor: pointer;
 }
 
-/* === TODO LIST === */
-.todo-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+/* === BOARD === */
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
 }
 
-.todo-section h2 {
+.board-column {
+  min-height: 280px;
+  padding: 14px;
+  background: #eef2ff;
+  border: 1px solid #dbe4ff;
+  border-radius: 14px;
+}
+
+.board-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.board-column-header h2 {
   font-size: 14px;
-  font-weight: 600;
-  color: #666;
+  font-weight: 700;
+  color: #334155;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e0e0e0;
+}
+
+.board-column-header span {
+  min-width: 28px;
+  padding: 4px 8px;
+  background: white;
+  color: #4361ee;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.board-column-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.board-column-empty {
+  padding: 18px 14px;
+  background: rgba(255,255,255,0.8);
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 14px;
+  text-align: center;
 }
 
 /* === TODO ITEM === */
 .todo-item {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 12px;
   padding: 16px;
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  margin-bottom: 8px;
-  border: 1px solid transparent;
+  border: 1px solid #dbe4ff;
   transition: box-shadow 0.2s, border-color 0.2s;
 }
 
@@ -206,40 +246,39 @@ body {
 }
 
 .todo-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-width: 0;
 }
 
-.toggle-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid #4361ee;
-  background: white;
-  color: #4361ee;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  flex-shrink: 0;
-}
-
-.todo-item.done .toggle-btn {
-  background: #4361ee;
-  color: white;
-}
-
-.toggle-btn:hover {
-  transform: scale(1.1);
-}
-
 .todo-title {
   font-size: 16px;
+  font-weight: 600;
+}
+
+.todo-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 13px;
+}
+
+.status-select {
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  color: #334155;
+  font-size: 13px;
 }
 
 .todo-due-date {
@@ -271,20 +310,19 @@ body {
 }
 
 .delete-btn {
-  padding: 6px;
-  background: none;
-  border: none;
+  align-self: flex-end;
+  padding: 8px 10px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+  color: #be123c;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.todo-item:hover .delete-btn {
-  opacity: 1;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .delete-btn:hover {
-  transform: scale(1.1);
+  background: #ffe4e6;
 }
 
 /* === STATES === */
@@ -650,6 +688,38 @@ body {
   cursor: pointer;
 }
 
+.board-column-todo {
+  background: #f8fafc;
+}
+
+.board-column-in-progress {
+  background: #fff7ed;
+}
+
+.board-column-review {
+  background: #faf5ff;
+}
+
+.board-column-done {
+  background: #f0fdf4;
+}
+
+.status-todo {
+  border-left: 4px solid #64748b;
+}
+
+.status-in-progress {
+  border-left: 4px solid #f59e0b;
+}
+
+.status-review {
+  border-left: 4px solid #8b5cf6;
+}
+
+.status-done {
+  border-left: 4px solid #10b981;
+}
+
 @media (max-width: 520px) {
   .header {
     padding: 20px 16px;
@@ -657,6 +727,10 @@ body {
 
   .main {
     padding: 16px;
+  }
+
+  .board-grid {
+    grid-template-columns: 1fr;
   }
 
   .statistics-summary,

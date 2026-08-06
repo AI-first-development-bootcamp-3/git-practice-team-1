@@ -1,7 +1,14 @@
 import React from 'react';
 import TodoItem from './TodoItem';
 
-function TodoList({ todos, onToggle, onDelete, onUpdateDueDate, showOverdueOnly }) {
+const BOARD_COLUMNS = [
+  { key: 'todo', title: 'To Do' },
+  { key: 'in-progress', title: 'In Progress' },
+  { key: 'review', title: 'Review' },
+  { key: 'done', title: 'Done' },
+];
+
+function TodoList({ todos, onStatusChange, onDelete, onUpdateDueDate, showOverdueOnly }) {
   if (todos.length === 0) {
     return (
       <div className="empty-state">
@@ -14,40 +21,36 @@ function TodoList({ todos, onToggle, onDelete, onUpdateDueDate, showOverdueOnly 
     );
   }
 
-  const pendingTodos = todos.filter(t => t.status === 'todo');
-  const doneTodos = todos.filter(t => t.status === 'done');
-
   return (
-    <div className="todo-list">
-      {pendingTodos.length > 0 && (
-        <section className="todo-section">
-          <h2>To Do ({pendingTodos.length})</h2>
-          {pendingTodos.map(todo => (
-            <TodoItem
-              key={todo.id}
-              todo={todo}
-              onToggle={onToggle}
-              onDelete={onDelete}
-              onUpdateDueDate={onUpdateDueDate}
-            />
-          ))}
-        </section>
-      )}
+    <div className="board-grid">
+      {BOARD_COLUMNS.map((column) => {
+        const columnTodos = todos.filter((todo) => todo.status === column.key);
 
-      {doneTodos.length > 0 && (
-        <section className="todo-section">
-          <h2>Done ({doneTodos.length})</h2>
-          {doneTodos.map(todo => (
-            <TodoItem
-              key={todo.id}
-              todo={todo}
-              onToggle={onToggle}
-              onDelete={onDelete}
-              onUpdateDueDate={onUpdateDueDate}
-            />
-          ))}
-        </section>
-      )}
+        return (
+          <section key={column.key} className={`board-column board-column-${column.key}`}>
+            <div className="board-column-header">
+              <h2>{column.title}</h2>
+              <span>{columnTodos.length}</span>
+            </div>
+
+            <div className="board-column-items">
+              {columnTodos.length > 0 ? (
+                columnTodos.map((todo) => (
+                  <TodoItem
+                    key={todo.id}
+                    todo={todo}
+                    onStatusChange={onStatusChange}
+                    onDelete={onDelete}
+                    onUpdateDueDate={onUpdateDueDate}
+                  />
+                ))
+              ) : (
+                <p className="board-column-empty">No tasks in this stage.</p>
+              )}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }
