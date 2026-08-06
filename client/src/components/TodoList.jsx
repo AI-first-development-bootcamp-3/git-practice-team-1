@@ -1,7 +1,14 @@
 import React from 'react';
 import TodoItem from './TodoItem';
 
-function TodoList({ todos, onToggle, onDelete, onUpdateDueDate, onUpdateTitle, showOverdueOnly }) {
+function TodoList({
+  todos,
+  statuses,
+  onStatusChange,
+  onDelete,
+  onUpdateDueDate, onUpdateTitle,
+  showOverdueOnly,
+}) {
   if (todos.length === 0) {
     return (
       <div className="empty-state">
@@ -13,9 +20,6 @@ function TodoList({ todos, onToggle, onDelete, onUpdateDueDate, onUpdateTitle, s
       </div>
     );
   }
-
-  const pendingTodos = todos.filter(t => t.status === 'todo');
-  const doneTodos = todos.filter(t => t.status === 'done');
 
   return (
     <div className="todo-list">
@@ -29,7 +33,6 @@ function TodoList({ todos, onToggle, onDelete, onUpdateDueDate, onUpdateTitle, s
               onToggle={onToggle}
               onDelete={onDelete}
               onUpdateDueDate={onUpdateDueDate}
-              onUpdateTitle={onUpdateTitle}
             />
           ))}
         </section>

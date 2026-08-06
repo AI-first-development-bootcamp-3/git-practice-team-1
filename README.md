@@ -43,7 +43,10 @@ todo-workshop/
 │   └── index.html
 ├── server/
 │   ├── src/
+│   │   ├── constants/
+│   │   │   └── statuses.js
 │   │   ├── routes/
+│   │   │   ├── statuses.js
 │   │   │   └── todos.js
 │   │   ├── services/
 │   │   │   └── todoService.js
@@ -59,13 +62,27 @@ todo-workshop/
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| GET | /api/statuses | Get allowed todo statuses (id + label) |
 | GET | /api/todos | Get all todos |
 | GET | /api/todos/statistics | Get server-calculated todo statistics |
 | GET | /api/todos/statistics/created-trend | Get daily task creation counts |
 | GET | /api/todos/:id | Get single todo |
-| POST | /api/todos | Create todo |
-| PUT | /api/todos/:id | Update todo |
+| POST | /api/todos | Create todo (optional status; defaults to todo) |
+| PUT | /api/todos/:id | Update todo (status must be a valid value) |
 | DELETE | /api/todos/:id | Delete todo |
+
+## Statuses Response
+
+`GET /api/statuses` returns:
+
+```json
+[
+  { "id": "todo", "label": "To Do" },
+  { "id": "in-progress", "label": "In Progress" },
+  { "id": "review", "label": "Review" },
+  { "id": "done", "label": "Done" }
+]
+```
 
 ## Todo Object
 

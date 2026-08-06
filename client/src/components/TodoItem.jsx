@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+const STATUS_ICONS = {
+  todo: '○',
+  'in-progress': '◐',
+  review: '◉',
+  done: '✓',
+};
+
 function isOverdue(todo) {
   if (!todo.dueDate || todo.status === 'done') {
     return false;
@@ -15,6 +22,9 @@ function isOverdue(todo) {
 
 function TodoItem({ todo, onToggle, onDelete, onUpdateDueDate, onUpdateTitle }) {
   const overdue = isOverdue(todo);
+  const statusMeta = statuses.find((s) => s.id === todo.status);
+  const statusLabel = statusMeta?.label || todo.status;
+  const statusIcon = STATUS_ICONS[todo.status] || '○';
   const [isEditing, setIsEditing] = useState(false);
   const [draftTitle, setDraftTitle] = useState(todo.title);
   const inputRef = useRef(null);
@@ -80,13 +90,13 @@ function TodoItem({ todo, onToggle, onDelete, onUpdateDueDate, onUpdateTitle }) 
 
   return (
     <div className={`todo-item ${todo.status === 'done' ? 'done' : ''} ${overdue ? 'overdue' : ''}`}>
-      <button
-        className="toggle-btn"
-        onClick={() => onToggle(todo.id)}
-        aria-label={todo.status === 'done' ? 'Mark as pending' : 'Mark as done'}
+      <span
+        className={`status-badge status-${todo.status}`}
+        title={statusLabel}
+        aria-label={`Status: ${statusLabel}`}
       >
-        {todo.status === 'done' ? '✓' : '○'}
-      </button>
+        {statusIcon}
+      </span>
 
       <div className="todo-content">
         {isEditing ? (
@@ -117,18 +127,35 @@ function TodoItem({ todo, onToggle, onDelete, onUpdateDueDate, onUpdateTitle }) 
             {todo.title}
           </span>
         )}
-        <div className="todo-due-date">
-          <label>
-            Due
-            <input
-              type="date"
-              className="due-date-input"
-              value={todo.dueDate || ''}
-              onChange={(e) => onUpdateDueDate(todo.id, e.target.value || null)}
-              aria-label={`Due date for ${todo.title}`}
-            />
+        <div className="todo-meta">
+          <label className="status-select-label">
+            Status
+            <select
+              className="status-select"
+              value={todo.status}
+              onChange={(e) => onStatusChange(todo.id, e.target.value)}
+              aria-label={`Status for ${todo.title}`}
+            >
+              {statuses.map((status) => (
+                <option key={status.id} value={status.id}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
           </label>
-          {overdue && <span className="overdue-badge">Overdue</span>}
+          <div className="todo-due-date">
+            <label>
+              Due
+              <input
+                type="date"
+                className="due-date-input"
+                value={todo.dueDate || ''}
+                onChange={(e) => onUpdateDueDate(todo.id, e.target.value || null)}
+                aria-label={`Due date for ${todo.title}`}
+              />
+            </label>
+            {overdue && <span className="overdue-badge">Overdue</span>}
+          </div>
         </div>
       </div>
 
