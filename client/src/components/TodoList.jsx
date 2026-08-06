@@ -1,11 +1,15 @@
 import React from 'react';
 import TodoItem from './TodoItem';
 
-function TodoList({ todos, onToggle, onDelete }) {
+function TodoList({ todos, onToggle, onDelete, onUpdateDueDate, showOverdueOnly }) {
   if (todos.length === 0) {
     return (
       <div className="empty-state">
-        <p>No todos yet. Add one above!</p>
+        <p>
+          {showOverdueOnly
+            ? 'No overdue todos.'
+            : 'No todos yet. Add one above!'}
+        </p>
       </div>
     );
   }
@@ -24,6 +28,7 @@ function TodoList({ todos, onToggle, onDelete }) {
               todo={todo}
               onToggle={onToggle}
               onDelete={onDelete}
+              onUpdateDueDate={onUpdateDueDate}
             />
           ))}
         </section>
@@ -38,6 +43,7 @@ function TodoList({ todos, onToggle, onDelete }) {
               todo={todo}
               onToggle={onToggle}
               onDelete={onDelete}
+              onUpdateDueDate={onUpdateDueDate}
             />
           ))}
         </section>

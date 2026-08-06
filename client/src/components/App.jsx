@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import TodoList from './TodoList';
 import AddTodo from './AddTodo';
+import { isOverdue } from './TodoItem';
 import '../App.css';
 
 function App() {
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showOverdueOnly, setShowOverdueOnly] = useState(false);
 
   useEffect(() => {
     loadTodos();
@@ -26,9 +28,9 @@ function App() {
     }
   };
 
-  const handleAdd = async (title) => {
+  const handleAdd = async ({ title, dueDate }) => {
     try {
-      const newTodo = await api.todos.create(title);
+      const newTodo = await api.todos.create({ title, dueDate });
       setTodos([...todos, newTodo]);
     } catch (err) {
       setError(err.message);
@@ -46,6 +48,15 @@ function App() {
     }
   };
 
+  const handleUpdateDueDate = async (id, dueDate) => {
+    try {
+      const updated = await api.todos.update(id, { dueDate });
+      setTodos(todos.map(t => t.id === id ? updated : t));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       await api.todos.delete(id);
@@ -55,6 +66,10 @@ function App() {
     }
   };
 
+  const visibleTodos = showOverdueOnly
+    ? todos.filter(isOverdue)
+    : todos;
+
   return (
     <div className="app">
       <header className="header">
@@ -63,6 +78,17 @@ function App() {
 
       <main className="main">
         <AddTodo onAdd={handleAdd} />
+
+        <div className="filters">
+          <label className="filter-toggle">
+            <input
+              type="checkbox"
+              checked={showOverdueOnly}
+              onChange={(e) => setShowOverdueOnly(e.target.checked)}
+            />
+            Overdue only
+          </label>
+        </div>
 
         {error && (
           <div className="error-message">
@@ -75,9 +101,11 @@ function App() {
           <div className="loading">Loading...</div>
         ) : (
           <TodoList
-            todos={todos}
+            todos={visibleTodos}
             onToggle={handleToggle}
             onDelete={handleDelete}
+            onUpdateDueDate={handleUpdateDueDate}
+            showOverdueOnly={showOverdueOnly}
           />
         )}
       </main>
