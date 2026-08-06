@@ -21,6 +21,8 @@ export const api = {
   todos: {
     getAll: () => fetchApi('/todos'),
 
+    getStatistics: () => fetchApi('/todos/statistics'),
+
     getById: (id) => fetchApi(`/todos/${id}`),
 
     create: ({ title, dueDate = null }) => fetchApi('/todos', {

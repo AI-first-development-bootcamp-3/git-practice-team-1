@@ -24,6 +24,33 @@ export const todoService = {
     return readTodos();
   },
 
+  getStatistics() {
+    const todos = readTodos();
+    const tasksByStatus = {
+      todo: 0,
+      'in-progress': 0,
+      review: 0,
+      done: 0
+    };
+
+    for (const todo of todos) {
+      if (Object.hasOwn(tasksByStatus, todo.status)) {
+        tasksByStatus[todo.status] += 1;
+      }
+    }
+
+    const totalTasks = todos.length;
+    const completionPercentage = totalTasks === 0
+      ? 0
+      : (tasksByStatus.done / totalTasks) * 100;
+
+    return {
+      totalTasks,
+      completionPercentage,
+      tasksByStatus
+    };
+  },
+
   getById(id) {
     const todos = readTodos();
     return todos.find(todo => todo.id === id);
