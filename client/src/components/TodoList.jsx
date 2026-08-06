@@ -8,7 +8,7 @@ const BOARD_COLUMNS = [
   { key: 'done', title: 'Done' },
 ];
 
-function TodoList({ todos, onStatusChange, onDelete, onUpdateDueDate, showOverdueOnly }) {
+function TodoList({ todos, onStatusChange, onDelete, onUpdateDueDate, onUpdateTitle, showOverdueOnly }) {
   if (todos.length === 0) {
     return (
       <div className="empty-state">

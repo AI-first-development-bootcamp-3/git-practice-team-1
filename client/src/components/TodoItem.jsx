@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const STATUS_OPTIONS = [
   { value: 'todo', label: 'To Do' },
@@ -22,13 +22,102 @@ function isOverdue(todo) {
   return todo.dueDate < todayStr;
 }
 
-function TodoItem({ todo, onStatusChange, onDelete, onUpdateDueDate }) {
+function TodoItem({ todo, onStatusChange, onDelete, onUpdateDueDate, onUpdateTitle }) {
   const overdue = isOverdue(todo);
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(todo.title);
+  const inputRef = useRef(null);
+  const skipBlurSave = useRef(false);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setDraftTitle(todo.title);
+    }
+  }, [todo.title, isEditing]);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const startEditing = () => {
+    setDraftTitle(todo.title);
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    skipBlurSave.current = true;
+    setDraftTitle(todo.title);
+    setIsEditing(false);
+  };
+
+  const saveTitle = () => {
+    const nextTitle = draftTitle.trim();
+    if (!nextTitle) {
+      setDraftTitle(todo.title);
+      setIsEditing(true);
+      requestAnimationFrame(() => inputRef.current?.focus());
+      return;
+    }
+
+    setIsEditing(false);
+
+    if (nextTitle !== todo.title) {
+      onUpdateTitle(todo.id, nextTitle);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveTitle();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelEditing();
+    }
+  };
+
+  const handleBlur = () => {
+    if (skipBlurSave.current) {
+      skipBlurSave.current = false;
+      return;
+    }
+    saveTitle();
+  };
 
   return (
     <div className={`todo-item status-${todo.status} ${todo.status === 'done' ? 'done' : ''} ${overdue ? 'overdue' : ''}`}>
       <div className="todo-content">
-        <span className="todo-title">{todo.title}</span>
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            className="todo-title-input"
+            value={draftTitle}
+            onChange={(e) => setDraftTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
+            aria-label={`Edit title for ${todo.title}`}
+          />
+        ) : (
+          <span
+            className="todo-title"
+            onClick={startEditing}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                startEditing();
+              }
+            }}
+            title="Click to edit"
+          >
+            {todo.title}
+          </span>
+        )}
 
         <div className="todo-meta-row">
           <label className="status-select-label">

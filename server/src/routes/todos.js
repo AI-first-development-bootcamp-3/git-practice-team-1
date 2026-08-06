@@ -76,6 +76,13 @@ export default async function todosRoutes(fastify, options) {
   fastify.put('/:id', async (request, reply) => {
     const updates = { ...(request.body || {}) };
 
+    if ('title' in updates) {
+      if (!updates.title || !String(updates.title).trim()) {
+        return reply.status(400).send({ error: 'Title is required' });
+      }
+      updates.title = String(updates.title).trim();
+    }
+
     if ('dueDate' in updates && !isValidDueDate(updates.dueDate)) {
       return reply.status(400).send({ error: 'dueDate must be YYYY-MM-DD' });
     }

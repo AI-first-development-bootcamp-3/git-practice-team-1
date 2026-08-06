@@ -57,6 +57,15 @@ function App() {
     }
   };
 
+  const handleUpdateTitle = async (id, title) => {
+    try {
+      const updated = await api.todos.update(id, { title });
+      setTodos(todos.map(t => t.id === id ? updated : t));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       await api.todos.delete(id);
@@ -127,6 +136,7 @@ function App() {
                 onStatusChange={handleStatusChange}
                 onDelete={handleDelete}
                 onUpdateDueDate={handleUpdateDueDate}
+                onUpdateTitle={handleUpdateTitle}
                 showOverdueOnly={showOverdueOnly}
               />
             )}
