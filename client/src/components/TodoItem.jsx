@@ -20,7 +20,14 @@ function isOverdue(todo) {
   return todo.dueDate < todayStr;
 }
 
-function TodoItem({ todo, onToggle, onDelete, onUpdateDueDate, onUpdateTitle }) {
+function TodoItem({
+  todo,
+  statuses = [],
+  onStatusChange,
+  onDelete,
+  onUpdateDueDate,
+  onUpdateTitle,
+}) {
   const overdue = isOverdue(todo);
   const statusMeta = statuses.find((s) => s.id === todo.status);
   const statusLabel = statusMeta?.label || todo.status;
