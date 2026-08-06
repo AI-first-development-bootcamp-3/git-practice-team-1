@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
+import StatusChart from './StatusChart';
 
 const STATUS_LABELS = {
   todo: 'To Do',
@@ -93,6 +94,8 @@ function Statistics() {
           </article>
         ))}
       </div>
+
+      <StatusChart tasksByStatus={statistics.tasksByStatus} />
     </section>
   );
 }
