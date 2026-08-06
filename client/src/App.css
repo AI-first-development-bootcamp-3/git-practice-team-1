@@ -258,6 +258,14 @@ body {
 }
 
 .todo-meta-row {
+.status-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #64748b;
+  background: white;
+  color: #64748b;
+  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -270,6 +278,8 @@ body {
   gap: 8px;
   color: #666;
   font-size: 13px;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .status-select {
@@ -279,6 +289,29 @@ body {
   background: white;
   color: #334155;
   font-size: 13px;
+.status-badge.status-todo {
+  border-color: #64748b;
+  color: #64748b;
+}
+
+.status-badge.status-in-progress {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.status-badge.status-review {
+  border-color: #8b5cf6;
+  color: #8b5cf6;
+}
+
+.status-badge.status-done {
+  border-color: #10b981;
+  background: #10b981;
+  color: white;
+}
+
+.todo-title {
+  font-size: 16px;
   cursor: text;
   border-radius: 4px;
   padding: 2px 4px;
@@ -304,6 +337,36 @@ body {
   font-family: inherit;
   color: #333;
   background: white;
+}
+
+.todo-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.status-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.status-select {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #4361ee;
 }
 
 .todo-due-date {

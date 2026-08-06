@@ -9,19 +9,24 @@ import '../App.css';
 function App() {
   const [activeView, setActiveView] = useState('board');
   const [todos, setTodos] = useState([]);
+  const [statuses, setStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showOverdueOnly, setShowOverdueOnly] = useState(false);
 
   useEffect(() => {
-    loadTodos();
+    loadBoard();
   }, []);
 
-  const loadTodos = async () => {
+  const loadBoard = async () => {
     try {
       setLoading(true);
-      const data = await api.todos.getAll();
-      setTodos(data);
+      const [todosData, statusesData] = await Promise.all([
+        api.todos.getAll(),
+        api.statuses.getAll(),
+      ]);
+      setTodos(todosData);
+      setStatuses(statusesData);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -133,6 +138,8 @@ function App() {
             ) : (
               <TodoList
                 todos={visibleTodos}
+                onStatusChange={handleStatusChange}
+                statuses={statuses}
                 onStatusChange={handleStatusChange}
                 onDelete={handleDelete}
                 onUpdateDueDate={handleUpdateDueDate}

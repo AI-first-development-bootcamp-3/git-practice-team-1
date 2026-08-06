@@ -9,6 +9,15 @@ const BOARD_COLUMNS = [
 ];
 
 function TodoList({ todos, onStatusChange, onDelete, onUpdateDueDate, onUpdateTitle, showOverdueOnly }) {
+function TodoList({
+  todos,
+  statuses = [],
+  onStatusChange,
+  onDelete,
+  onUpdateDueDate,
+  onUpdateTitle,
+  showOverdueOnly,
+}) {
   if (todos.length === 0) {
     return (
       <div className="empty-state">
@@ -48,6 +57,30 @@ function TodoList({ todos, onStatusChange, onDelete, onUpdateDueDate, onUpdateTi
                 <p className="board-column-empty">No tasks in this stage.</p>
               )}
             </div>
+          </section>
+        );
+      })}
+    <div className="todo-list">
+      {statuses.map((status) => {
+        const sectionTodos = todos.filter((t) => t.status === status.id);
+        if (sectionTodos.length === 0) {
+          return null;
+        }
+
+        return (
+          <section key={status.id} className="todo-section">
+            <h2>{status.label} ({sectionTodos.length})</h2>
+            {sectionTodos.map((todo) => (
+              <TodoItem
+                key={todo.id}
+                todo={todo}
+                statuses={statuses}
+                onStatusChange={onStatusChange}
+                onDelete={onDelete}
+                onUpdateDueDate={onUpdateDueDate}
+                onUpdateTitle={onUpdateTitle}
+              />
+            ))}
           </section>
         );
       })}

@@ -1,4 +1,5 @@
 import { todoService } from '../services/todoService.js';
+import { isValidStatus } from '../constants/statuses.js';
 
 const DUE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const VALID_STATUSES = new Set(['todo', 'in-progress', 'review', 'done']);
@@ -58,16 +59,20 @@ export default async function todosRoutes(fastify, options) {
 
   // POST /api/todos - Create new todo
   fastify.post('/', async (request, reply) => {
-    const { title, dueDate } = request.body || {};
+    const { title, dueDate, status } = request.body || {};
     if (!title || !title.trim()) {
       return reply.status(400).send({ error: 'Title is required' });
     }
     if (!isValidDueDate(dueDate)) {
       return reply.status(400).send({ error: 'dueDate must be YYYY-MM-DD' });
     }
+    if (status !== undefined && !isValidStatus(status)) {
+      return reply.status(400).send({ error: 'Invalid status' });
+    }
     const todo = todoService.create({
       title: title.trim(),
       dueDate: normalizeDueDate(dueDate),
+      status,
     });
     return reply.status(201).send(todo);
   });
@@ -93,6 +98,10 @@ export default async function todosRoutes(fastify, options) {
 
     if ('dueDate' in updates) {
       updates.dueDate = normalizeDueDate(updates.dueDate);
+    }
+
+    if ('status' in updates && !isValidStatus(updates.status)) {
+      return reply.status(400).send({ error: 'Invalid status' });
     }
 
     const todo = todoService.update(request.params.id, updates);
