@@ -30,6 +30,7 @@ todo-workshop/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── App.jsx
+│   │   │   ├── Statistics.jsx
 │   │   │   ├── TodoList.jsx
 │   │   │   ├── TodoItem.jsx
 │   │   │   └── AddTodo.jsx
@@ -59,6 +60,7 @@ todo-workshop/
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | /api/todos | Get all todos |
+| GET | /api/todos/statistics | Get server-calculated todo statistics |
 | GET | /api/todos/:id | Get single todo |
 | POST | /api/todos | Create todo |
 | PUT | /api/todos/:id | Update todo |
@@ -70,9 +72,26 @@ todo-workshop/
 {
   "id": "uuid",
   "title": "Task title",
-  "status": "todo | done",
+  "status": "todo | in-progress | review | done",
   "createdAt": "ISO date",
   "updatedAt": "ISO date"
+}
+```
+
+## Statistics Response
+
+`GET /api/todos/statistics` performs all aggregation on the server and returns:
+
+```json
+{
+  "totalTasks": 0,
+  "completionPercentage": 0.0,
+  "tasksByStatus": {
+    "todo": 0,
+    "in-progress": 0,
+    "review": 0,
+    "done": 0
+  }
 }
 ```
 

@@ -4,10 +4,10 @@
 - [x] 1.3 Verify populated and empty statistics responses.
 
 ## 2. Frontend Statistics
-- [ ] 2.1 Add statistics API fetch logic.
-- [ ] 2.2 Add Board/Statistics navigation and the Statistics view.
-- [ ] 2.3 Add responsive cards, progress, loading, and error styles.
+- [x] 2.1 Add statistics API fetch logic.
+- [x] 2.2 Add Board/Statistics navigation and the Statistics view.
+- [x] 2.3 Add responsive cards, progress, loading, and error styles.
 
 ## 3. Documentation and Validation
-- [ ] 3.1 Document the endpoint and DTO in the project README.
-- [ ] 3.2 Build the client and validate the OpenSpec change.
+- [x] 3.1 Document the endpoint and DTO in the project README.
+- [x] 3.2 Build the client and validate the OpenSpec change.
