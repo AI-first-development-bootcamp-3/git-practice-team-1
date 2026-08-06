@@ -7,6 +7,11 @@ export default async function todosRoutes(fastify, options) {
     return todoService.getAll();
   });
 
+  // GET /api/todos/statistics - Get aggregated todo statistics
+  fastify.get('/statistics', async (request, reply) => {
+    return todoService.getStatistics();
+  });
+
   // GET /api/todos/:id - Get single todo
   fastify.get('/:id', async (request, reply) => {
     const todo = todoService.getById(request.params.id);
