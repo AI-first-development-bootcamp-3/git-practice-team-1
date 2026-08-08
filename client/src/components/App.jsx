@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import TodoList from './TodoList';
 import AddTodo from './AddTodo';
+import TodoFilters from './TodoFilters';
 import Statistics from './Statistics';
 import { isOverdue } from './TodoItem';
 import '../App.css';
+
+function toggleValue(list, value) {
+  return list.includes(value)
+    ? list.filter((item) => item !== value)
+    : [...list, value];
+}
 
 function App() {
   const [activeView, setActiveView] = useState('board');
@@ -13,32 +20,75 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showOverdueOnly, setShowOverdueOnly] = useState(false);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [selectedStatuses, setSelectedStatuses] = useState([]);
+  const [selectedPriorities, setSelectedPriorities] = useState([]);
+  const isInitialLoad = useRef(true);
+  const loadRequestId = useRef(0);
 
   useEffect(() => {
-    loadBoard();
+    const timer = setTimeout(() => setDebouncedSearch(search), 250);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    loadStatuses();
   }, []);
 
-  const loadBoard = async () => {
+  useEffect(() => {
+    loadTodos();
+  }, [debouncedSearch, selectedStatuses, selectedPriorities]);
+
+  const hasActiveFilters =
+    Boolean(debouncedSearch.trim()) ||
+    selectedStatuses.length > 0 ||
+    selectedPriorities.length > 0;
+
+  const loadStatuses = async () => {
     try {
-      setLoading(true);
-      const [todosData, statusesData] = await Promise.all([
-        api.todos.getAll(),
-        api.statuses.getAll(),
-      ]);
-      setTodos(todosData);
+      const statusesData = await api.statuses.getAll();
       setStatuses(statusesData);
-      setError(null);
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const loadTodos = async () => {
+    const requestId = ++loadRequestId.current;
+    const showLoading = isInitialLoad.current;
+
+    try {
+      if (showLoading) {
+        setLoading(true);
+      }
+      const todosData = await api.todos.getAll({
+        search: debouncedSearch,
+        status: selectedStatuses,
+        priority: selectedPriorities,
+      });
+      if (requestId !== loadRequestId.current) {
+        return;
+      }
+      setTodos(todosData);
+      setError(null);
+    } catch (err) {
+      if (requestId !== loadRequestId.current) {
+        return;
+      }
+      setError(err.message);
     } finally {
-      setLoading(false);
+      if (requestId === loadRequestId.current) {
+        setLoading(false);
+        isInitialLoad.current = false;
+      }
     }
   };
 
   const handleAdd = async ({ title, dueDate, priority }) => {
     try {
-      const newTodo = await api.todos.create({ title, dueDate, priority });
-      setTodos([...todos, newTodo]);
+      await api.todos.create({ title, dueDate, priority });
+      await loadTodos();
     } catch (err) {
       setError(err.message);
     }
@@ -46,8 +96,8 @@ function App() {
 
   const handleStatusChange = async (id, status) => {
     try {
-      const updated = await api.todos.update(id, { status });
-      setTodos(todos.map(t => t.id === id ? updated : t));
+      await api.todos.update(id, { status });
+      await loadTodos();
     } catch (err) {
       setError(err.message);
     }
@@ -64,8 +114,8 @@ function App() {
 
   const handleUpdatePriority = async (id, priority) => {
     try {
-      const updated = await api.todos.update(id, { priority });
-      setTodos(todos.map(t => t.id === id ? updated : t));
+      await api.todos.update(id, { priority });
+      await loadTodos();
     } catch (err) {
       setError(err.message);
     }
@@ -73,8 +123,9 @@ function App() {
 
   const handleUpdateTitle = async (id, title) => {
     try {
-      const updated = await api.todos.update(id, { title });
-      setTodos(todos.map(t => t.id === id ? updated : t));
+      await api.todos.update(id, { title });
+      // Refetch so active search/status/priority filters stay accurate.
+      await loadTodos();
     } catch (err) {
       setError(err.message);
     }
@@ -89,6 +140,14 @@ function App() {
     }
   };
 
+  const clearFilters = () => {
+    setSearch('');
+    setDebouncedSearch('');
+    setSelectedStatuses([]);
+    setSelectedPriorities([]);
+  };
+
+  // Overdue-only is client-side and runs AFTER search/status/priority (not a server param).
   const visibleTodos = showOverdueOnly
     ? todos.filter(isOverdue)
     : todos;
@@ -124,6 +183,22 @@ function App() {
           <>
             <AddTodo onAdd={handleAdd} />
 
+            <TodoFilters
+              search={search}
+              selectedStatuses={selectedStatuses}
+              selectedPriorities={selectedPriorities}
+              statuses={statuses}
+              onSearchChange={setSearch}
+              onToggleStatus={(statusId) =>
+                setSelectedStatuses((current) => toggleValue(current, statusId))
+              }
+              onTogglePriority={(priority) =>
+                setSelectedPriorities((current) => toggleValue(current, priority))
+              }
+              onClear={clearFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
+
             <div className="filters">
               <label className="filter-toggle">
                 <input
@@ -154,6 +229,7 @@ function App() {
                 onUpdatePriority={handleUpdatePriority}
                 onUpdateTitle={handleUpdateTitle}
                 showOverdueOnly={showOverdueOnly}
+                hasActiveFilters={hasActiveFilters}
               />
             )}
           </>
