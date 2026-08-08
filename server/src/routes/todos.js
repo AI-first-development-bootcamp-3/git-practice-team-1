@@ -1,8 +1,7 @@
-import { todoService } from '../services/todoService.js';
+import { todoService, ValidationError } from '../services/todoService.js';
 import { isValidStatus } from '../constants/statuses.js';
 
 const DUE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-const VALID_STATUSES = new Set(['todo', 'in-progress', 'review', 'done']);
 
 function isValidDueDate(dueDate) {
   if (dueDate === null || dueDate === undefined || dueDate === '') {
@@ -25,10 +24,6 @@ function normalizeDueDate(dueDate) {
     return null;
   }
   return dueDate;
-}
-
-function isValidStatus(status) {
-  return typeof status === 'string' && VALID_STATUSES.has(status);
 }
 
 export default async function todosRoutes(fastify, options) {
@@ -59,7 +54,7 @@ export default async function todosRoutes(fastify, options) {
 
   // POST /api/todos - Create new todo
   fastify.post('/', async (request, reply) => {
-    const { title, dueDate, status } = request.body || {};
+    const { title, dueDate, status, priority } = request.body || {};
     if (!title || !title.trim()) {
       return reply.status(400).send({ error: 'Title is required' });
     }
@@ -69,12 +64,20 @@ export default async function todosRoutes(fastify, options) {
     if (status !== undefined && !isValidStatus(status)) {
       return reply.status(400).send({ error: 'Invalid status' });
     }
-    const todo = todoService.create({
-      title: title.trim(),
-      dueDate: normalizeDueDate(dueDate),
-      status,
-    });
-    return reply.status(201).send(todo);
+    try {
+      const todo = todoService.create({
+        title: title.trim(),
+        dueDate: normalizeDueDate(dueDate),
+        status,
+        priority,
+      });
+      return reply.status(201).send(todo);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return reply.status(400).send({ error: error.message });
+      }
+      throw error;
+    }
   });
 
   // PUT /api/todos/:id - Update todo
@@ -100,15 +103,18 @@ export default async function todosRoutes(fastify, options) {
       updates.dueDate = normalizeDueDate(updates.dueDate);
     }
 
-    if ('status' in updates && !isValidStatus(updates.status)) {
-      return reply.status(400).send({ error: 'Invalid status' });
+    try {
+      const todo = todoService.update(request.params.id, updates);
+      if (!todo) {
+        return reply.status(404).send({ error: 'Todo not found' });
+      }
+      return todo;
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return reply.status(400).send({ error: error.message });
+      }
+      throw error;
     }
-
-    const todo = todoService.update(request.params.id, updates);
-    if (!todo) {
-      return reply.status(404).send({ error: 'Todo not found' });
-    }
-    return todo;
   });
 
   // DELETE /api/todos/:id - Delete todo

@@ -35,12 +35,17 @@ function TodoItem({
   onStatusChange,
   onDelete,
   onUpdateDueDate,
+  onUpdatePriority,
   onUpdateTitle,
 }) {
   const overdue = isOverdue(todo);
+  const priority = todo.priority || 'medium';
   const statusMeta = statuses.find((s) => s.id === todo.status);
   const statusLabel = statusMeta?.label || todo.status;
   const statusIcon = STATUS_ICONS[todo.status] || '○';
+  const statusOptions = statuses.length > 0
+    ? statuses.map((status) => ({ value: status.id, label: status.label }))
+    : STATUS_OPTIONS;
   const [isEditing, setIsEditing] = useState(false);
   const [draftTitle, setDraftTitle] = useState(todo.title);
   const inputRef = useRef(null);
@@ -105,7 +110,9 @@ function TodoItem({
   };
 
   return (
-    <div className={`todo-item ${todo.status === 'done' ? 'done' : ''} ${overdue ? 'overdue' : ''}`}>
+    <div
+      className={`todo-item priority-${priority} ${todo.status === 'done' ? 'done' : ''} ${overdue ? 'overdue' : ''}`}
+    >
       <span
         className={`status-badge status-${todo.status}`}
         title={statusLabel}
@@ -144,24 +151,6 @@ function TodoItem({
           </span>
         )}
 
-        <div className="todo-meta-row">
-          <label className="status-select-label">
-            Status
-            <select
-              className="status-select"
-              value={todo.status}
-              onChange={(e) => onStatusChange(todo.id, e.target.value)}
-              aria-label={`Status for ${todo.title}`}
-            >
-              {STATUS_OPTIONS.map((statusOption) => (
-                <option key={statusOption.value} value={statusOption.value}>
-                  {statusOption.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
         <div className="todo-meta">
           <label className="status-select-label">
             Status
@@ -171,11 +160,24 @@ function TodoItem({
               onChange={(e) => onStatusChange(todo.id, e.target.value)}
               aria-label={`Status for ${todo.title}`}
             >
-              {statuses.map((status) => (
-                <option key={status.id} value={status.id}>
-                  {status.label}
+              {statusOptions.map((statusOption) => (
+                <option key={statusOption.value} value={statusOption.value}>
+                  {statusOption.label}
                 </option>
               ))}
+            </select>
+          </label>
+          <label className="priority-label">
+            Priority
+            <select
+              className={`priority-select priority-${priority}`}
+              value={priority}
+              onChange={(e) => onUpdatePriority(todo.id, e.target.value)}
+              aria-label={`Priority for ${todo.title}`}
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
             </select>
           </label>
           <div className="todo-due-date">
