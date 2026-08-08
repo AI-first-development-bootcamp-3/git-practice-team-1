@@ -337,7 +337,7 @@ body {
   justify-content: center;
   flex-shrink: 0;
 }
-
+}
 .status-select {
   padding: 6px 10px;
   border: 1px solid #cbd5e1;
@@ -939,4 +939,5 @@ body {
   .line-chart-date {
     font-size: 11px;
   }
+}
 }
