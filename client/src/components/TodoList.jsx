@@ -17,6 +17,7 @@ function TodoList({
   onUpdatePriority,
   onUpdateTitle,
   showOverdueOnly,
+  hasActiveFilters = false,
 }) {
   if (todos.length === 0) {
     return (
@@ -24,7 +25,9 @@ function TodoList({
         <p>
           {showOverdueOnly
             ? 'No overdue todos.'
-            : 'No todos yet. Add one above!'}
+            : hasActiveFilters
+              ? 'No todos match your search or filters.'
+              : 'No todos yet. Add one above!'}
         </p>
       </div>
     );
