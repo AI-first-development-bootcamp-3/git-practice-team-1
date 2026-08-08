@@ -1,4 +1,4 @@
-import { todoService, VALID_PRIORITIES } from '../services/todoService.js';
+import { todoService, ValidationError } from '../services/todoService.js';
 
 const DUE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -23,10 +23,6 @@ function normalizeDueDate(dueDate) {
     return null;
   }
   return dueDate;
-}
-
-function isValidPriority(priority) {
-  return VALID_PRIORITIES.includes(priority);
 }
 
 export default async function todosRoutes(fastify, options) {
@@ -54,17 +50,19 @@ export default async function todosRoutes(fastify, options) {
     if (!isValidDueDate(dueDate)) {
       return reply.status(400).send({ error: 'dueDate must be YYYY-MM-DD' });
     }
-    if (priority !== undefined && priority !== null && priority !== '' && !isValidPriority(priority)) {
-      return reply.status(400).send({ error: 'priority must be low, medium, or high' });
+    try {
+      const todo = todoService.create({
+        title: title.trim(),
+        dueDate: normalizeDueDate(dueDate),
+        priority,
+      });
+      return reply.status(201).send(todo);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return reply.status(400).send({ error: error.message });
+      }
+      throw error;
     }
-    const todo = todoService.create({
-      title: title.trim(),
-      dueDate: normalizeDueDate(dueDate),
-      ...(priority !== undefined && priority !== null && priority !== ''
-        ? { priority }
-        : {}),
-    });
-    return reply.status(201).send(todo);
   });
 
   // PUT /api/todos/:id - Update todo
@@ -79,17 +77,18 @@ export default async function todosRoutes(fastify, options) {
       updates.dueDate = normalizeDueDate(updates.dueDate);
     }
 
-    if ('priority' in updates) {
-      if (!isValidPriority(updates.priority)) {
-        return reply.status(400).send({ error: 'priority must be low, medium, or high' });
+    try {
+      const todo = todoService.update(request.params.id, updates);
+      if (!todo) {
+        return reply.status(404).send({ error: 'Todo not found' });
       }
+      return todo;
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return reply.status(400).send({ error: error.message });
+      }
+      throw error;
     }
-
-    const todo = todoService.update(request.params.id, updates);
-    if (!todo) {
-      return reply.status(404).send({ error: 'Todo not found' });
-    }
-    return todo;
   });
 
   // DELETE /api/todos/:id - Delete todo

@@ -9,6 +9,8 @@ const DATA_FILE = join(__dirname, '../data/todos.json');
 export const VALID_PRIORITIES = ['low', 'medium', 'high'];
 const DEFAULT_PRIORITY = 'medium';
 
+export class ValidationError extends Error {}
+
 function readTodos() {
   try {
     const data = readFileSync(DATA_FILE, 'utf-8');
@@ -23,8 +25,11 @@ function writeTodos(todos) {
 }
 
 function normalizePriority(priority) {
-  if (priority === undefined || priority === null || priority === '') {
+  if (priority === undefined) {
     return DEFAULT_PRIORITY;
+  }
+  if (!VALID_PRIORITIES.includes(priority)) {
+    throw new ValidationError('priority must be low, medium, or high');
   }
   return priority;
 }
@@ -33,7 +38,7 @@ function withNormalizedPriority(todo) {
   if (!todo) return todo;
   return {
     ...todo,
-    priority: normalizePriority(todo.priority),
+    priority: VALID_PRIORITIES.includes(todo.priority) ? todo.priority : DEFAULT_PRIORITY,
   };
 }
 

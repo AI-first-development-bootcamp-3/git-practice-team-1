@@ -3,15 +3,16 @@
     "id": "1",
     "title": "Learn Git basics",
     "status": "done",
+    "priority": "low",
     "dueDate": "2024-01-10",
     "createdAt": "2024-01-15T09:00:00.000Z",
-    "updatedAt": "2026-08-06T12:39:16.197Z",
-    "priority": "medium"
+    "updatedAt": "2026-01-09T21:43:33.408Z"
   },
   {
     "id": "2",
     "title": "Practice merge conflicts",
     "status": "todo",
+    "priority": "high",
     "dueDate": "2024-01-20",
     "createdAt": "2024-01-15T10:00:00.000Z",
     "updatedAt": "2024-01-15T10:00:00.000Z"
@@ -20,26 +21,9 @@
     "id": "3",
     "title": "Build awesome features",
     "status": "todo",
+    "priority": "medium",
     "dueDate": "2099-12-31",
     "createdAt": "2024-01-15T11:00:00.000Z",
     "updatedAt": "2024-01-15T11:00:00.000Z"
-  },
-  {
-    "id": "2a5d0e6d-1214-4fee-86be-4ddf1503013e",
-    "title": "Eat crossiant",
-    "status": "todo",
-    "priority": "high",
-    "dueDate": "2026-08-06",
-    "createdAt": "2026-08-06T12:40:15.658Z",
-    "updatedAt": "2026-08-06T12:41:33.984Z"
-  },
-  {
-    "id": "c01baf7e-a868-4474-90ef-ab4f22cb0865",
-    "title": "EAT",
-    "status": "todo",
-    "priority": "medium",
-    "dueDate": "2026-08-06",
-    "createdAt": "2026-08-06T12:41:24.960Z",
-    "updatedAt": "2026-08-06T12:41:24.960Z"
   }
 ]
