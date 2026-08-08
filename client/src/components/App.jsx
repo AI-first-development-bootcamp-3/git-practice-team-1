@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import TodoList from './TodoList';
 import AddTodo from './AddTodo';
@@ -24,6 +24,8 @@ function App() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [selectedPriorities, setSelectedPriorities] = useState([]);
+  const isInitialLoad = useRef(true);
+  const loadRequestId = useRef(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 250);
@@ -53,19 +55,33 @@ function App() {
   };
 
   const loadTodos = async () => {
+    const requestId = ++loadRequestId.current;
+    const showLoading = isInitialLoad.current;
+
     try {
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
       const todosData = await api.todos.getAll({
         search: debouncedSearch,
         status: selectedStatuses,
         priority: selectedPriorities,
       });
+      if (requestId !== loadRequestId.current) {
+        return;
+      }
       setTodos(todosData);
       setError(null);
     } catch (err) {
+      if (requestId !== loadRequestId.current) {
+        return;
+      }
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (requestId === loadRequestId.current) {
+        setLoading(false);
+        isInitialLoad.current = false;
+      }
     }
   };
 
@@ -107,8 +123,9 @@ function App() {
 
   const handleUpdateTitle = async (id, title) => {
     try {
-      const updated = await api.todos.update(id, { title });
-      setTodos(todos.map(t => t.id === id ? updated : t));
+      await api.todos.update(id, { title });
+      // Refetch so active search/status/priority filters stay accurate.
+      await loadTodos();
     } catch (err) {
       setError(err.message);
     }
