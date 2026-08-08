@@ -30,6 +30,7 @@ todo-workshop/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── App.jsx
+│   │   │   ├── Statistics.jsx
 │   │   │   ├── TodoList.jsx
 │   │   │   ├── TodoItem.jsx
 │   │   │   └── AddTodo.jsx
@@ -42,7 +43,10 @@ todo-workshop/
 │   └── index.html
 ├── server/
 │   ├── src/
+│   │   ├── constants/
+│   │   │   └── statuses.js
 │   │   ├── routes/
+│   │   │   ├── statuses.js
 │   │   │   └── todos.js
 │   │   ├── services/
 │   │   │   └── todoService.js
@@ -58,11 +62,27 @@ todo-workshop/
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| GET | /api/statuses | Get allowed todo statuses (id + label) |
 | GET | /api/todos | Get all todos |
+| GET | /api/todos/statistics | Get server-calculated todo statistics |
+| GET | /api/todos/statistics/created-trend | Get daily task creation counts |
 | GET | /api/todos/:id | Get single todo |
-| POST | /api/todos | Create todo |
-| PUT | /api/todos/:id | Update todo |
+| POST | /api/todos | Create todo (optional status; defaults to todo) |
+| PUT | /api/todos/:id | Update todo (status must be a valid value) |
 | DELETE | /api/todos/:id | Delete todo |
+
+## Statuses Response
+
+`GET /api/statuses` returns:
+
+```json
+[
+  { "id": "todo", "label": "To Do" },
+  { "id": "in-progress", "label": "In Progress" },
+  { "id": "review", "label": "Review" },
+  { "id": "done", "label": "Done" }
+]
+```
 
 ## Todo Object
 
@@ -70,9 +90,41 @@ todo-workshop/
 {
   "id": "uuid",
   "title": "Task title",
-  "status": "todo | done",
+  "status": "todo | in-progress | review | done",
   "createdAt": "ISO date",
   "updatedAt": "ISO date"
+}
+```
+
+## Statistics Response
+
+`GET /api/todos/statistics` performs all aggregation on the server and returns:
+
+```json
+{
+  "totalTasks": 0,
+  "completionPercentage": 0.0,
+  "tasksByStatus": {
+    "todo": 0,
+    "in-progress": 0,
+    "review": 0,
+    "done": 0
+  }
+}
+```
+
+## Creation Trend Response
+
+`GET /api/todos/statistics/created-trend` groups valid creation timestamps by UTC date:
+
+```json
+{
+  "tasksCreatedByDate": [
+    {
+      "date": "2026-08-06",
+      "count": 3
+    }
+  ]
 }
 ```
 

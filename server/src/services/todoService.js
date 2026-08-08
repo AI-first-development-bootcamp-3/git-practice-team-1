@@ -47,6 +47,54 @@ export const todoService = {
     return readTodos().map(withNormalizedPriority);
   },
 
+  getStatistics() {
+    const todos = readTodos();
+    const tasksByStatus = {
+      todo: 0,
+      'in-progress': 0,
+      review: 0,
+      done: 0
+    };
+
+    for (const todo of todos) {
+      if (Object.hasOwn(tasksByStatus, todo.status)) {
+        tasksByStatus[todo.status] += 1;
+      }
+    }
+
+    const totalTasks = todos.length;
+    const completionPercentage = totalTasks === 0
+      ? 0
+      : (tasksByStatus.done / totalTasks) * 100;
+
+    return {
+      totalTasks,
+      completionPercentage,
+      tasksByStatus
+    };
+  },
+
+  getCreatedTrend() {
+    const todos = readTodos();
+    const countsByDate = {};
+
+    for (const todo of todos) {
+      const createdAt = new Date(todo.createdAt);
+      if (Number.isNaN(createdAt.getTime())) {
+        continue;
+      }
+
+      const date = createdAt.toISOString().slice(0, 10);
+      countsByDate[date] = (countsByDate[date] ?? 0) + 1;
+    }
+
+    const tasksCreatedByDate = Object.entries(countsByDate)
+      .sort(([firstDate], [secondDate]) => firstDate.localeCompare(secondDate))
+      .map(([date, count]) => ({ date, count }));
+
+    return { tasksCreatedByDate };
+  },
+
   getById(id) {
     const todos = readTodos();
     const todo = todos.find(todo => todo.id === id);
@@ -58,7 +106,7 @@ export const todoService = {
     const newTodo = {
       id: crypto.randomUUID(),
       title: todoData.title,
-      status: 'todo',
+      status: todoData.status ?? 'todo',
       priority: normalizePriority(todoData.priority),
       dueDate: todoData.dueDate ?? null,
       createdAt: new Date().toISOString(),

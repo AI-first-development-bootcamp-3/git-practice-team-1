@@ -2,24 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import TodoList from './TodoList';
 import AddTodo from './AddTodo';
+import Statistics from './Statistics';
 import { isOverdue } from './TodoItem';
 import '../App.css';
 
 function App() {
+  const [activeView, setActiveView] = useState('board');
   const [todos, setTodos] = useState([]);
+  const [statuses, setStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showOverdueOnly, setShowOverdueOnly] = useState(false);
 
   useEffect(() => {
-    loadTodos();
+    loadBoard();
   }, []);
 
-  const loadTodos = async () => {
+  const loadBoard = async () => {
     try {
       setLoading(true);
-      const data = await api.todos.getAll();
-      setTodos(data);
+      const [todosData, statusesData] = await Promise.all([
+        api.todos.getAll(),
+        api.statuses.getAll(),
+      ]);
+      setTodos(todosData);
+      setStatuses(statusesData);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -37,11 +44,9 @@ function App() {
     }
   };
 
-  const handleToggle = async (id) => {
+  const handleStatusChange = async (id, status) => {
     try {
-      const todo = todos.find(t => t.id === id);
-      const newStatus = todo.status === 'done' ? 'todo' : 'done';
-      const updated = await api.todos.update(id, { status: newStatus });
+      const updated = await api.todos.update(id, { status });
       setTodos(todos.map(t => t.id === id ? updated : t));
     } catch (err) {
       setError(err.message);
@@ -66,6 +71,15 @@ function App() {
     }
   };
 
+  const handleUpdateTitle = async (id, title) => {
+    try {
+      const updated = await api.todos.update(id, { title });
+      setTodos(todos.map(t => t.id === id ? updated : t));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       await api.todos.delete(id);
@@ -83,40 +97,66 @@ function App() {
     <div className="app">
       <header className="header">
         <h1>Todo App</h1>
+        <nav className="view-tabs" aria-label="Main navigation">
+          <button
+            type="button"
+            className={activeView === 'board' ? 'active' : ''}
+            aria-pressed={activeView === 'board'}
+            onClick={() => setActiveView('board')}
+          >
+            Task Board
+          </button>
+          <button
+            type="button"
+            className={activeView === 'statistics' ? 'active' : ''}
+            aria-pressed={activeView === 'statistics'}
+            onClick={() => setActiveView('statistics')}
+          >
+            Statistics
+          </button>
+        </nav>
       </header>
 
       <main className="main">
-        <AddTodo onAdd={handleAdd} />
-
-        <div className="filters">
-          <label className="filter-toggle">
-            <input
-              type="checkbox"
-              checked={showOverdueOnly}
-              onChange={(e) => setShowOverdueOnly(e.target.checked)}
-            />
-            Overdue only
-          </label>
-        </div>
-
-        {error && (
-          <div className="error-message">
-            {error}
-            <button onClick={() => setError(null)}>x</button>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="loading">Loading...</div>
+        {activeView === 'statistics' ? (
+          <Statistics />
         ) : (
-          <TodoList
-            todos={visibleTodos}
-            onToggle={handleToggle}
-            onDelete={handleDelete}
-            onUpdateDueDate={handleUpdateDueDate}
-            onUpdatePriority={handleUpdatePriority}
-            showOverdueOnly={showOverdueOnly}
-          />
+          <>
+            <AddTodo onAdd={handleAdd} />
+
+            <div className="filters">
+              <label className="filter-toggle">
+                <input
+                  type="checkbox"
+                  checked={showOverdueOnly}
+                  onChange={(e) => setShowOverdueOnly(e.target.checked)}
+                />
+                Overdue only
+              </label>
+            </div>
+
+            {error && (
+              <div className="error-message">
+                {error}
+                <button onClick={() => setError(null)}>x</button>
+              </div>
+            )}
+
+            {loading ? (
+              <div className="loading">Loading...</div>
+            ) : (
+              <TodoList
+                todos={visibleTodos}
+                statuses={statuses}
+                onStatusChange={handleStatusChange}
+                onDelete={handleDelete}
+                onUpdateDueDate={handleUpdateDueDate}
+                onUpdatePriority={handleUpdatePriority}
+                onUpdateTitle={handleUpdateTitle}
+                showOverdueOnly={showOverdueOnly}
+              />
+            )}
+          </>
         )}
       </main>
     </div>

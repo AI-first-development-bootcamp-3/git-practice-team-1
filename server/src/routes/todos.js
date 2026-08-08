@@ -1,4 +1,5 @@
 import { todoService, ValidationError } from '../services/todoService.js';
+import { isValidStatus } from '../constants/statuses.js';
 
 const DUE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -32,6 +33,16 @@ export default async function todosRoutes(fastify, options) {
     return todoService.getAll();
   });
 
+  // GET /api/todos/statistics - Get aggregated todo statistics
+  fastify.get('/statistics', async (request, reply) => {
+    return todoService.getStatistics();
+  });
+
+  // GET /api/todos/statistics/created-trend - Get daily task creation counts
+  fastify.get('/statistics/created-trend', async (request, reply) => {
+    return todoService.getCreatedTrend();
+  });
+
   // GET /api/todos/:id - Get single todo
   fastify.get('/:id', async (request, reply) => {
     const todo = todoService.getById(request.params.id);
@@ -43,17 +54,21 @@ export default async function todosRoutes(fastify, options) {
 
   // POST /api/todos - Create new todo
   fastify.post('/', async (request, reply) => {
-    const { title, dueDate, priority } = request.body || {};
+    const { title, dueDate, status, priority } = request.body || {};
     if (!title || !title.trim()) {
       return reply.status(400).send({ error: 'Title is required' });
     }
     if (!isValidDueDate(dueDate)) {
       return reply.status(400).send({ error: 'dueDate must be YYYY-MM-DD' });
     }
+    if (status !== undefined && !isValidStatus(status)) {
+      return reply.status(400).send({ error: 'Invalid status' });
+    }
     try {
       const todo = todoService.create({
         title: title.trim(),
         dueDate: normalizeDueDate(dueDate),
+        status,
         priority,
       });
       return reply.status(201).send(todo);
@@ -69,8 +84,19 @@ export default async function todosRoutes(fastify, options) {
   fastify.put('/:id', async (request, reply) => {
     const updates = { ...(request.body || {}) };
 
+    if ('title' in updates) {
+      if (!updates.title || !String(updates.title).trim()) {
+        return reply.status(400).send({ error: 'Title is required' });
+      }
+      updates.title = String(updates.title).trim();
+    }
+
     if ('dueDate' in updates && !isValidDueDate(updates.dueDate)) {
       return reply.status(400).send({ error: 'dueDate must be YYYY-MM-DD' });
+    }
+
+    if ('status' in updates && !isValidStatus(updates.status)) {
+      return reply.status(400).send({ error: 'status must be one of todo, in-progress, review, done' });
     }
 
     if ('dueDate' in updates) {

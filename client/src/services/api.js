@@ -18,8 +18,15 @@ async function fetchApi(endpoint, options = {}) {
 }
 
 export const api = {
+  statuses: {
+    getAll: () => fetchApi('/statuses'),
+  },
   todos: {
     getAll: () => fetchApi('/todos'),
+
+    getStatistics: () => fetchApi('/todos/statistics'),
+
+    getCreatedTrend: () => fetchApi('/todos/statistics/created-trend'),
 
     getById: (id) => fetchApi(`/todos/${id}`),
 

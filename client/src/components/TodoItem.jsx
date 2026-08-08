@@ -1,37 +1,172 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+const STATUS_OPTIONS = [
+  { value: 'todo', label: 'To Do' },
+  { value: 'in-progress', label: 'In Progress' },
+  { value: 'review', label: 'Review' },
+  { value: 'done', label: 'Done' },
+];
+
+const STATUS_ICONS = {
+  todo: '○',
+  'in-progress': '◐',
+  review: '◉',
+  done: '✓',
+};
 
 function isOverdue(todo) {
   if (!todo.dueDate || todo.status === 'done') {
     return false;
   }
+
   const today = new Date();
   const todayStr = [
     today.getFullYear(),
     String(today.getMonth() + 1).padStart(2, '0'),
     String(today.getDate()).padStart(2, '0'),
   ].join('-');
+
   return todo.dueDate < todayStr;
 }
 
-function TodoItem({ todo, onToggle, onDelete, onUpdateDueDate, onUpdatePriority }) {
+function TodoItem({
+  todo,
+  statuses = [],
+  onStatusChange,
+  onDelete,
+  onUpdateDueDate,
+  onUpdatePriority,
+  onUpdateTitle,
+}) {
   const overdue = isOverdue(todo);
   const priority = todo.priority || 'medium';
+  const statusMeta = statuses.find((s) => s.id === todo.status);
+  const statusLabel = statusMeta?.label || todo.status;
+  const statusIcon = STATUS_ICONS[todo.status] || '○';
+  const statusOptions = statuses.length > 0
+    ? statuses.map((status) => ({ value: status.id, label: status.label }))
+    : STATUS_OPTIONS;
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(todo.title);
+  const inputRef = useRef(null);
+  const skipBlurSave = useRef(false);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setDraftTitle(todo.title);
+    }
+  }, [todo.title, isEditing]);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const startEditing = () => {
+    setDraftTitle(todo.title);
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    skipBlurSave.current = true;
+    setDraftTitle(todo.title);
+    setIsEditing(false);
+  };
+
+  const saveTitle = () => {
+    const nextTitle = draftTitle.trim();
+    if (!nextTitle) {
+      setDraftTitle(todo.title);
+      setIsEditing(true);
+      requestAnimationFrame(() => inputRef.current?.focus());
+      return;
+    }
+
+    setIsEditing(false);
+
+    if (nextTitle !== todo.title) {
+      onUpdateTitle(todo.id, nextTitle);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveTitle();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelEditing();
+    }
+  };
+
+  const handleBlur = () => {
+    if (skipBlurSave.current) {
+      skipBlurSave.current = false;
+      return;
+    }
+    saveTitle();
+  };
 
   return (
     <div
       className={`todo-item priority-${priority} ${todo.status === 'done' ? 'done' : ''} ${overdue ? 'overdue' : ''}`}
     >
-      <button
-        className="toggle-btn"
-        onClick={() => onToggle(todo.id)}
-        aria-label={todo.status === 'done' ? 'Mark as pending' : 'Mark as done'}
+      <span
+        className={`status-badge status-${todo.status}`}
+        title={statusLabel}
+        aria-label={`Status: ${statusLabel}`}
       >
-        {todo.status === 'done' ? '✓' : '○'}
-      </button>
+        {statusIcon}
+      </span>
 
       <div className="todo-content">
-        <span className="todo-title">{todo.title}</span>
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            className="todo-title-input"
+            value={draftTitle}
+            onChange={(e) => setDraftTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
+            aria-label={`Edit title for ${todo.title}`}
+          />
+        ) : (
+          <span
+            className="todo-title"
+            onClick={startEditing}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                startEditing();
+              }
+            }}
+            title="Click to edit"
+          >
+            {todo.title}
+          </span>
+        )}
+
         <div className="todo-meta">
+          <label className="status-select-label">
+            Status
+            <select
+              className="status-select"
+              value={todo.status}
+              onChange={(e) => onStatusChange(todo.id, e.target.value)}
+              aria-label={`Status for ${todo.title}`}
+            >
+              {statusOptions.map((statusOption) => (
+                <option key={statusOption.value} value={statusOption.value}>
+                  {statusOption.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="priority-label">
             Priority
             <select
@@ -66,7 +201,7 @@ function TodoItem({ todo, onToggle, onDelete, onUpdateDueDate, onUpdatePriority 
         onClick={() => onDelete(todo.id)}
         aria-label="Delete todo"
       >
-        🗑️
+        Delete
       </button>
     </div>
   );
