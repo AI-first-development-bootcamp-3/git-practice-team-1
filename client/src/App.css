@@ -82,7 +82,7 @@ body {
 }
 
 .priority-select {
-  padding: 12px 14px;
+  padding: 12px 36px 12px 14px;
   font-size: 14px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
@@ -91,24 +91,29 @@ body {
   color: #333;
   cursor: pointer;
   transition: border-color 0.2s, background-color 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
 }
 
 .priority-select.priority-low {
   border-color: var(--priority-low);
   color: var(--priority-low);
-  background: color-mix(in srgb, var(--priority-low) 12%, white);
+  background-color: color-mix(in srgb, var(--priority-low) 12%, white);
 }
 
 .priority-select.priority-medium {
   border-color: var(--priority-medium);
   color: var(--priority-medium);
-  background: color-mix(in srgb, var(--priority-medium) 12%, white);
+  background-color: color-mix(in srgb, var(--priority-medium) 12%, white);
 }
 
 .priority-select.priority-high {
   border-color: var(--priority-high);
   color: var(--priority-high);
-  background: color-mix(in srgb, var(--priority-high) 12%, white);
+  background-color: color-mix(in srgb, var(--priority-high) 12%, white);
 }
 
 .priority-select:focus {
@@ -276,7 +281,7 @@ body {
 }
 
 .priority-label .priority-select {
-  padding: 6px 10px;
+  padding: 6px 28px 6px 10px;
   font-size: 13px;
 }
 
