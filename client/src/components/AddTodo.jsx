@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 function AddTodo({ onAdd }) {
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState('medium');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -10,9 +11,11 @@ function AddTodo({ onAdd }) {
       onAdd({
         title: title.trim(),
         dueDate: dueDate || null,
+        priority,
       });
       setTitle('');
       setDueDate('');
+      setPriority('medium');
     }
   };
 
@@ -25,6 +28,16 @@ function AddTodo({ onAdd }) {
         placeholder="What needs to be done?"
         className="add-input"
       />
+      <select
+        value={priority}
+        onChange={(e) => setPriority(e.target.value)}
+        className={`priority-select priority-${priority}`}
+        aria-label="Priority"
+      >
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
       <input
         type="date"
         value={dueDate}
