@@ -8,15 +8,16 @@ const BOARD_COLUMNS = [
   { key: 'done', title: 'Done' },
 ];
 
-function TodoList({ todos, onStatusChange, onDelete, onUpdateDueDate, onUpdateTitle, showOverdueOnly }) {
 function TodoList({
   todos,
   statuses = [],
   onStatusChange,
   onDelete,
   onUpdateDueDate,
+  onUpdatePriority,
   onUpdateTitle,
   showOverdueOnly,
+  hasActiveFilters = false,
 }) {
   if (todos.length === 0) {
     return (
@@ -24,7 +25,9 @@ function TodoList({
         <p>
           {showOverdueOnly
             ? 'No overdue todos.'
-            : 'No todos yet. Add one above!'}
+            : hasActiveFilters
+              ? 'No todos match your search or filters.'
+              : 'No todos yet. Add one above!'}
         </p>
       </div>
     );
@@ -48,39 +51,18 @@ function TodoList({
                   <TodoItem
                     key={todo.id}
                     todo={todo}
+                    statuses={statuses}
                     onStatusChange={onStatusChange}
                     onDelete={onDelete}
                     onUpdateDueDate={onUpdateDueDate}
+                    onUpdatePriority={onUpdatePriority}
+                    onUpdateTitle={onUpdateTitle}
                   />
                 ))
               ) : (
                 <p className="board-column-empty">No tasks in this stage.</p>
               )}
             </div>
-          </section>
-        );
-      })}
-    <div className="todo-list">
-      {statuses.map((status) => {
-        const sectionTodos = todos.filter((t) => t.status === status.id);
-        if (sectionTodos.length === 0) {
-          return null;
-        }
-
-        return (
-          <section key={status.id} className="todo-section">
-            <h2>{status.label} ({sectionTodos.length})</h2>
-            {sectionTodos.map((todo) => (
-              <TodoItem
-                key={todo.id}
-                todo={todo}
-                statuses={statuses}
-                onStatusChange={onStatusChange}
-                onDelete={onDelete}
-                onUpdateDueDate={onUpdateDueDate}
-                onUpdateTitle={onUpdateTitle}
-              />
-            ))}
           </section>
         );
       })}

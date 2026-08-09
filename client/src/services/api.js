@@ -17,12 +17,27 @@ async function fetchApi(endpoint, options = {}) {
   return response.json();
 }
 
+function buildTodosQuery(filters = {}) {
+  const params = new URLSearchParams();
+  if (typeof filters.search === 'string' && filters.search.trim()) {
+    params.set('search', filters.search.trim());
+  }
+  if (Array.isArray(filters.status) && filters.status.length > 0) {
+    params.set('status', filters.status.join(','));
+  }
+  if (Array.isArray(filters.priority) && filters.priority.length > 0) {
+    params.set('priority', filters.priority.join(','));
+  }
+  const query = params.toString();
+  return query ? `?${query}` : '';
+}
+
 export const api = {
   statuses: {
     getAll: () => fetchApi('/statuses'),
   },
   todos: {
-    getAll: () => fetchApi('/todos'),
+    getAll: (filters = {}) => fetchApi(`/todos${buildTodosQuery(filters)}`),
 
     getStatistics: () => fetchApi('/todos/statistics'),
 
@@ -30,9 +45,9 @@ export const api = {
 
     getById: (id) => fetchApi(`/todos/${id}`),
 
-    create: ({ title, dueDate = null }) => fetchApi('/todos', {
+    create: ({ title, dueDate = null, priority = 'medium' }) => fetchApi('/todos', {
       method: 'POST',
-      body: JSON.stringify({ title, dueDate }),
+      body: JSON.stringify({ title, dueDate, priority }),
     }),
 
     update: (id, updates) => fetchApi(`/todos/${id}`, {
