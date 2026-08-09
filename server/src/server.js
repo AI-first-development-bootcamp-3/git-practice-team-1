@@ -6,7 +6,8 @@ import statusesRoutes from './routes/statuses.js';
 const fastify = Fastify({ logger: true });
 
 await fastify.register(cors, {
-  origin: 'http://localhost:5173'
+  // Vite may be opened as localhost or 127.0.0.1; browsers treat them as different origins.
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
 });
 
 await fastify.register(statusesRoutes, { prefix: '/api/statuses' });
