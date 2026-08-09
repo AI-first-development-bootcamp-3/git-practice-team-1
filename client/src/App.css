@@ -389,12 +389,6 @@ body {
   min-width: 0;
 }
 
-.todo-title {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.todo-meta-row {
 .status-badge {
   width: 28px;
   height: 28px;
@@ -405,27 +399,10 @@ body {
   font-size: 14px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.status-select-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #666;
-  font-size: 13px;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.status-select {
-  padding: 6px 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: white;
-  color: #334155;
-  font-size: 13px;
 .status-badge.status-todo {
   border-color: #64748b;
   color: #64748b;
@@ -449,6 +426,7 @@ body {
 
 .todo-title {
   font-size: 16px;
+  font-weight: 600;
   cursor: text;
   border-radius: 4px;
   padding: 2px 4px;
