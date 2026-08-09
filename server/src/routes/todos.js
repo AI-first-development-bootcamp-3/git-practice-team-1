@@ -1,7 +1,33 @@
-import { todoService, ValidationError } from '../services/todoService.js';
+import { todoService, ValidationError, VALID_PRIORITIES } from '../services/todoService.js';
 import { isValidStatus } from '../constants/statuses.js';
 
 const DUE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const VALID_PRIORITY_SET = new Set(VALID_PRIORITIES);
+
+function parseListParam(value) {
+  if (typeof value !== 'string' || !value.trim()) {
+    return [];
+  }
+  return value.split(',').map((item) => item.trim()).filter(Boolean);
+}
+
+function parseTodoFilters(query) {
+  const filters = { search: query.search };
+
+  filters.status = parseListParam(query.status);
+  const invalidStatus = filters.status.find((status) => !isValidStatus(status));
+  if (invalidStatus) {
+    throw new ValidationError(`Invalid status: ${invalidStatus}`);
+  }
+
+  filters.priority = parseListParam(query.priority);
+  const invalidPriority = filters.priority.find((priority) => !VALID_PRIORITY_SET.has(priority));
+  if (invalidPriority) {
+    throw new ValidationError(`Invalid priority: ${invalidPriority}`);
+  }
+
+  return filters;
+}
 
 function isValidDueDate(dueDate) {
   if (dueDate === null || dueDate === undefined || dueDate === '') {
@@ -28,9 +54,17 @@ function normalizeDueDate(dueDate) {
 
 export default async function todosRoutes(fastify, options) {
 
-  // GET /api/todos - Get all todos
+  // GET /api/todos - Get all todos, optionally filtered by search, status, priority
   fastify.get('/', async (request, reply) => {
-    return todoService.getAll();
+    try {
+      const filters = parseTodoFilters(request.query || {});
+      return todoService.getAll(filters);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return reply.status(400).send({ error: error.message });
+      }
+      throw error;
+    }
   });
 
   // GET /api/todos/statistics - Get aggregated todo statistics

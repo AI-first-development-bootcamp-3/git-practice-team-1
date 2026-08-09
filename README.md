@@ -63,13 +63,25 @@ todo-workshop/
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | /api/statuses | Get allowed todo statuses (id + label) |
-| GET | /api/todos | Get all todos |
+| GET | /api/todos | Get all todos (optional `search`, `status`, `priority` query params) |
 | GET | /api/todos/statistics | Get server-calculated todo statistics |
 | GET | /api/todos/statistics/created-trend | Get daily task creation counts |
 | GET | /api/todos/:id | Get single todo |
 | POST | /api/todos | Create todo (optional status; defaults to todo) |
 | PUT | /api/todos/:id | Update todo (status must be a valid value) |
 | DELETE | /api/todos/:id | Delete todo |
+
+## Todo Filtering
+
+`GET /api/todos` accepts optional query parameters, combined with AND across parameters and OR within a single parameter's comma-separated list:
+
+| Param | Format | Behavior |
+|-------|--------|----------|
+| `search` | string | Case-insensitive substring match on title |
+| `status` | comma-separated status ids | e.g. `status=todo,review` |
+| `priority` | comma-separated priority values | e.g. `priority=high,medium` |
+
+Unrecognized `status` or `priority` values return `400`. No matches returns `200` with `[]`.
 
 ## Statuses Response
 

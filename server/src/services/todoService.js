@@ -43,8 +43,25 @@ function withNormalizedPriority(todo) {
 }
 
 export const todoService = {
-  getAll() {
-    return readTodos().map(withNormalizedPriority);
+  getAll(filters = {}) {
+    let todos = readTodos().map(withNormalizedPriority);
+
+    const search = typeof filters.search === 'string' ? filters.search.trim().toLowerCase() : '';
+    if (search) {
+      todos = todos.filter((todo) => todo.title.toLowerCase().includes(search));
+    }
+
+    if (Array.isArray(filters.status) && filters.status.length > 0) {
+      const allowed = new Set(filters.status);
+      todos = todos.filter((todo) => allowed.has(todo.status));
+    }
+
+    if (Array.isArray(filters.priority) && filters.priority.length > 0) {
+      const allowed = new Set(filters.priority);
+      todos = todos.filter((todo) => allowed.has(todo.priority));
+    }
+
+    return todos;
   },
 
   getStatistics() {
